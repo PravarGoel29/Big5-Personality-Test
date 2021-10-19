@@ -9,7 +9,7 @@ def convertdate(d):
     return datetime.datetime(int(d[2]), mo.index(d[1])+1, int(d[0]))
  
 # Path to your `.ged` file
-file_path = 'SAVLEEN-KAUR-27-Sep-2021-152245640.ged'
+file_path = '/Users/pravar/Downloads/Family-4-19-Sep-2021-014639122 (2).ged'
 
 # Initialize the parser
 gedcom_parser = Parser()
