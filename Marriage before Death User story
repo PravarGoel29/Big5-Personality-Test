@@ -11,7 +11,7 @@ def marrbeforedeat():
     mo=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"]
 
     # Path to your `.ged` file
-    file_path = 'SAVLEEN-KAUR-27-Sep-2021-152245640.ged'
+    file_path = '/Users/pravar/Downloads/Family-4-19-Sep-2021-014639122 (2).ged'
     gedcom_parser = Parser()
     # Parse your file
     gedcom_parser.parse_file(file_path)
