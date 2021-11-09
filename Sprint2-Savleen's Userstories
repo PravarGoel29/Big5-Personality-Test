@@ -1,0 +1,142 @@
+from gedcom.parser import Parser
+import datetime
+from datetime import date
+import collections
+
+
+def convertdate(d):
+    d=d.split(" ")
+    mo=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"]
+    return datetime.datetime(int(d[2]), mo.index(d[1])+1, int(d[0]))
+
+
+def gedcomfunc():    
+    # Path to your `.ged` file
+    file_path = 'SAVLEEN KAUR-FAMILYTREE.ged'
+    
+    # Initialize the parser
+    gedcom_parser = Parser()
+    
+    # Parse your file
+    gedcom_parser.parse_file(file_path)
+    
+    root_child_elements = gedcom_parser.get_root_child_elements()
+    
+    # Iterate through all root child elements
+    for element in root_child_elements:
+        
+        if element.get_tag()=="FAM":
+            # print("")
+            # print("")
+            arr=[]
+            error=0
+            mar_date="not available" 
+            # print(element.get_pointer())
+            for i in element.get_child_elements():
+                # print(i)
+                if i.get_tag()=="HUSB" or i.get_tag()=="WIFE":
+                    arr.append(i.get_value())
+                                   
+                if i.get_tag()=="MARR":
+                    for k in i.get_child_elements():
+                        # print(k) 
+                        if k.get_tag()=="DATE":
+                            mar_date=k.get_value()
+                            mar_date=convertdate(mar_date)
+            # print(arr)
+            # print(mar_date)
+           
+            if mar_date!="not available":
+                for per in root_child_elements:
+                    # print(per.get_pointer())
+                    if per.get_pointer() in arr:
+                        # print(per.get_pointer())
+                        for pe in per.get_child_elements():
+                            #print(pe)
+                            if pe.get_tag()=="DEAT":
+                                #print(pe)
+                                for p in pe.get_child_elements():
+                                    if p.get_tag()=="DATE":
+                                        
+                                        death_date=p.get_value()
+                                        
+                                        death_date=convertdate(death_date)
+                                        # print(birth_date)
+                                        # print(mar_date)
+                                        if death_date<mar_date:
+                                            print("Marriage date invalid for family:"+element.get_pointer()+"as Death date is before Marriage date")
+            if mar_date!="not available":
+                for per in root_child_elements:
+                    # print(per.get_pointer())
+                    if per.get_pointer() in arr:
+                        # print(per.get_pointer())
+                        for pe in per.get_child_elements():
+                            #print(pe)
+                            if pe.get_tag()=="BIRT":
+                                #print(pe)
+                                for p in pe.get_child_elements():
+                                    if p.get_tag()=="DATE":
+                                        
+                                        birth_date=p.get_value()
+                                        
+                                        birth_date=convertdate(birth_date)
+                                        # print(birth_date)
+                                        # print(mar_date)
+                                        diff=(mar_date - birth_date).days/365.25
+                                        if diff<18:
+                                            print("Marriage date invalid for family:"+element.get_pointer()+"as Birth date of " +per.get_pointer()+ " is not more than 18 year before Marriage date")
+                                            break
+    lf=[]
+    li=[]                                      
+    for element in root_child_elements:
+        if element.get_tag()=="FAM":
+            lf.append(element.get_pointer())
+        if element.get_tag()=="INDI":
+            li.append(element.get_pointer())
+            
+    dlf=[item for item, count in collections.Counter(lf).items() if count > 1]
+    dli=[item for item, count in collections.Counter(li).items() if count > 1]
+    
+    if(len(dlf)>0):
+        print("duplicate FAM Id for :",dlf)
+    if(len(dli)>0):
+        print("duplicate INDI Id for :",dli)
+    
+    
+    
+    for element in root_child_elements:
+        if element.get_tag()=="INDI" and  element.get_pointer()=="@I12@":
+            #print(element.get_pointer())
+            birth_date="NA"
+            death_date="NA"
+            #print(datetime.datetime.now())
+            for pe in element.get_child_elements():
+                #print(pe)
+                if pe.get_tag()=="BIRT":
+                    #print(pe)
+                    for p in pe.get_child_elements():
+                        if p.get_tag()=="DATE":
+                            birth_date=p.get_value()
+                            birth_date=convertdate(birth_date)
+                            #print(birth_date)
+                if pe.get_tag()=="DEAT":
+                    #print(pe)
+                    for p in pe.get_child_elements():
+                        if p.get_tag()=="DATE":
+                            death_date=p.get_value()
+                            death_date=convertdate(death_date)
+                            #print(death_date)
+            if(death_date!="NA" and birth_date!="NA"):
+                diff=(death_date - birth_date).days/365.25
+                if diff>150 or diff<0:
+                    print("invalid birth and death dates for:", element.get_pointer())
+            if(death_date=="NA" and birth_date!="NA"):
+                if (datetime.datetime.now() - birth_date).days/365.25>150 or (datetime.datetime.now() - birth_date).days/365.25<0:
+                    print("invalid birth date for:", element.get_pointer())
+
+
+
+gedcomfunc()
+
+
+print("End of Program")
