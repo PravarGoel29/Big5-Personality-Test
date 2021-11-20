@@ -1,0 +1,78 @@
+from gedcom.parser import Parser
+import datetime
+# from datetime import date
+import collections
+
+
+def listdead():
+    # Path to your `.ged` file
+    file_path = 'SAVLEEN KAUR-FAMILYTREE.ged'
+    gedcom_parser = Parser()
+    gedcom_parser.parse_file(file_path)
+    root_child_elements = gedcom_parser.get_root_child_elements()
+    lis=[]
+    # Iterate through all root child elements
+    for element in root_child_elements:
+        if element.get_tag()=="INDI":
+            for pe in element.get_child_elements():
+                if pe.get_tag()=="DEAT":
+                    lis.append(element.get_pointer())
+                    #print(element.get_pointer()+"is dead")
+    if(len(lis)>0):
+        print("list of dead individual is ",lis)
+    
+def orphans():
+    # Path to your `.ged` file
+    file_path = 'SAVLEEN KAUR-FAMILYTREE.ged'
+    gedcom_parser = Parser()
+    gedcom_parser.parse_file(file_path)
+    root_child_elements = gedcom_parser.get_root_child_elements()
+    lis=[]
+    # Iterate through all root child elements
+    for element in root_child_elements:
+        if element.get_tag()=="INDI":
+            for pe in element.get_child_elements():
+                if pe.get_tag()=="DEAT":
+                    lis.append(element.get_pointer())
+                    #print(element.get_pointer()+"is dead")
+                    
+    lisorp=[]               
+    for element in root_child_elements:
+        if element.get_tag()=="FAM":
+            # print("")
+            # print("")
+            arrc=[]
+            h="NA"
+            w="NA"
+            mar_date="not available" 
+            # print(element.get_pointer())
+            for i in element.get_child_elements():
+                # print(i)
+                if i.get_tag()=="HUSB":
+                    h=i.get_value()
+                if i.get_tag()=="WIFE":
+                    w=i.get_value()
+                if i.get_tag()=="CHIL":
+                    arrc.append(i.get_value())
+            if(h in lis and w in lis):
+                for element in root_child_elements:
+                    if element.get_tag()=="INDI" and element.get_pointer() in arrc:
+                        for pe in element.get_child_elements():
+                            #print(pe)
+                            if pe.get_tag()=="BIRT":
+                                #print(pe)
+                                for p in pe.get_child_elements():
+                                    if p.get_tag()=="DATE":
+                                        birth_date=p.get_value()
+                                        birth_date=convertdate(birth_date)
+                                        if ((datetime.datetime.now() - birth_date).days/365.25<18):
+                                            lisorp.append(element.get_pointer())
+    print("list if orphans is",lisorp)
+
+
+
+#gedcomfunc() ### Birth before marriage ## marriage before death ## less than 150years old ## Unique IDs
+listdead()   ### list decreased
+orphans()   ### list orphans
+
+print("End of Program")
